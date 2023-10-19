@@ -6,11 +6,10 @@ require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
-// gucci
-// https://i.ibb.co/pX0TfW6/johanne-pold-jacobsen-1-A5h-Sv-PZj-Mc-unsplash.jpg
 
+ 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o9ylutr.mongodb.net/?retryWrites=true&w=majority`;
 
