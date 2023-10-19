@@ -29,7 +29,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
       await client.connect();
 
-      const productsCollection = client.db("productsDB").collection("products");
+    // const productsCollection = client.db("productsDB").collection("products");
+    const database = client.db("productsDB");
+    const productsCollection = database.collection("products");
+    const addCollection = database.collection("addProducts");
       
 
       app.get('/brand', async(req, res) => {
@@ -48,10 +51,18 @@ async function run() {
 
       app.post('/product', async (req, res) => {
           const newProduct = req.body;
-        //   console.log(newProduct);
+          // console.log(newProduct);
           const result = await productsCollection.insertOne(newProduct);
           res.send(result);
       })
+    
+    app.post('/add', async(req, res) => {
+      const addProduct = req.body;
+      // console.log(addProduct);
+        const result = await addCollection.insertOne(addProduct);
+          res.send(result);
+
+    })
 
 
     // Send a ping to confirm a successful connection
