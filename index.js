@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -32,10 +32,18 @@ async function run() {
       const productsCollection = client.db("productsDB").collection("products");
       
 
-      app.get('/product', async(req, res) => {
+      app.get('/brand', async(req, res) => {
           const cursor = productsCollection.find();
           const result = await cursor.toArray();
           res.send(result);
+      })
+    
+    app.get('/product/:id' , async(req, res) => {
+          const id = req.params.id;
+          const query = {_id : new ObjectId(id)};
+          const result = await productsCollection.findOne(query);
+          res.send(result);
+          // console.log(result);
       })
 
       app.post('/product', async (req, res) => {
@@ -59,7 +67,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Fashion Apparel server in running');
+    res.send('Fashion Apparel server in runninggggggg 22');
 })
 
 
