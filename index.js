@@ -47,7 +47,13 @@ async function run() {
           const result = await productsCollection.findOne(query);
           res.send(result);
           // console.log(result);
-      })
+    })
+    
+    app.get('/carts', async (req, res) => {
+      const cursor1 = addCollection.find();
+      const result = await cursor1.toArray();
+      res.send(result);
+    })
 
       app.post('/product', async (req, res) => {
           const newProduct = req.body;
@@ -58,11 +64,30 @@ async function run() {
     
     app.post('/add', async(req, res) => {
       const addProduct = req.body;
-      // console.log(addProduct);
         const result = await addCollection.insertOne(addProduct);
-          res.send(result);
+      res.send(result);
+      // console.log(result);
 
     })
+
+    // app.delete('/carts/:id', async(req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await addCollection.deleteOne(query);
+    //   console.log(id);
+    //   console.log(result);
+    //     res.send(result);
+    // })
+     app.delete('/carts/:id', async(req, res) => {
+      const id = req.params.id;
+       const query = { _id: id };
+      const result = await addCollection.deleteOne(query);
+      // console.log(id);
+      // console.log(result);
+        res.send(result);
+    })
+
+
 
 
     // Send a ping to confirm a successful connection
