@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
@@ -29,12 +30,20 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
       // await client.connect();
 
-    // const productsCollection = client.db("productsDB").collection("products");
+    
     const database = client.db("productsDB");
     const productsCollection = database.collection("products");
     const addCollection = database.collection("addProducts");
       
 
+    //Token create
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      // console.log(user);
+      const token = jwt.sign(user , 'secret' , {expiresIn: '1h'})
+      res.send(token);
+    })
+     
       app.get('/brand', async(req, res) => {
           const cursor = productsCollection.find();
           const result = await cursor.toArray();
