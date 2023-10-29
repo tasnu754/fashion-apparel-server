@@ -18,7 +18,7 @@ app.use(cookieParser());
 
 //Verify token
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies.UserToken;
+  const token = req.cookies?.UserToken;
   // console.log(token);
   if (!token) {
     return res.status(401).send({message: "Not Authorized"})
@@ -30,7 +30,7 @@ const verifyToken = async (req, res, next) => {
       return res.status(401).send({message: "Unauthorized"})
     }
     console.log("value od dewcode", decoded);
-    
+    req.user = decoded;
      next();
   })
 
@@ -99,6 +99,7 @@ async function run() {
     // })
     app.get('/carts',verifyToken, async (req, res) => {
       // console.log("tokkken", req.cookies.UserToken);
+      console.log(req.user);
       let query = {};
 
       if (req.query?.email) {
