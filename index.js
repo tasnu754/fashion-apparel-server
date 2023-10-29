@@ -49,10 +49,22 @@ async function run() {
           // console.log(result);
     })
     
+    // app.get('/carts', async (req, res) => {
+    //   const cursor1 = addCollection.find();
+    //   const result = await cursor1.toArray();
+    //   console.log(result);
+    //   res.send(result);
+    // })
     app.get('/carts', async (req, res) => {
-      const cursor1 = addCollection.find();
+      // console.log(req.query);
+      let query = {};
+
+      if (req.query?.email) {
+        query = {email : req.query.email}
+      }
+      const cursor1 = addCollection.find(query);
       const result = await cursor1.toArray();
-      console.log(result);
+      // console.log(result);
       res.send(result);
     })
 
