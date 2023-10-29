@@ -1,15 +1,41 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173"],
+  credentials: true
+}));
 app.use(express.json()); 
+app.use(cookieParser());
 
+//http://localhost:5000/carts?email=sonia@mila.com
 
+//Verify token
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies.UserToken;
+  // console.log(token);
+  if (!token) {
+    return res.status(401).send({message: "Not Authorized"})
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      console.log(err);
+      return res.status(401).send({message: "Unauthorized"})
+    }
+    console.log("value od dewcode", decoded);
+    
+     next();
+  })
+
+ 
+}
  
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o9ylutr.mongodb.net/?retryWrites=true&w=majority`;
@@ -40,8 +66,15 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       // console.log(user);
-      const token = jwt.sign(user , 'secret' , {expiresIn: '1h'})
-      res.send(token);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      
+      res
+        .cookie('UserToken', token, {
+          httpOnly: true,
+          secure: false,
+          // sameSite: 'none'
+        })
+        .send({success: true});
     })
      
       app.get('/brand', async(req, res) => {
@@ -64,8 +97,8 @@ async function run() {
     //   console.log(result);
     //   res.send(result);
     // })
-    app.get('/carts', async (req, res) => {
-      // console.log(req.query);
+    app.get('/carts',verifyToken, async (req, res) => {
+      // console.log("tokkken", req.cookies.UserToken);
       let query = {};
 
       if (req.query?.email) {
