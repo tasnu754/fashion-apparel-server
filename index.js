@@ -1,41 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: ["http://localhost:5173"],
-  credentials: true
-}));
+
+app.use(cors());
 app.use(express.json()); 
-app.use(cookieParser());
-
-//http://localhost:5000/carts?email=sonia@mila.com
-
-//Verify token
-const verifyToken = async (req, res, next) => {
-  const token = req.cookies?.UserToken;
-  // console.log(token);
-  if (!token) {
-    return res.status(401).send({message: "Not Authorized"})
-  }
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      console.log(err);
-      return res.status(401).send({message: "Unauthorized"})
-    }
-    console.log("value od dewcode", decoded);
-    req.user = decoded;
-     next();
-  })
-
- 
-}
  
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o9ylutr.mongodb.net/?retryWrites=true&w=majority`;
@@ -49,7 +21,7 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   }
-});
+}); 
 
 async function run() {
   try {
@@ -61,21 +33,6 @@ async function run() {
     const productsCollection = database.collection("products");
     const addCollection = database.collection("addProducts");
       
-
-    //Token create
-    app.post("/jwt", async (req, res) => {
-      const user = req.body;
-      // console.log(user);
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-      
-      res
-        .cookie('UserToken', token, {
-          httpOnly: true,
-          secure: false,
-          // sameSite: 'none'
-        })
-        .send({success: true});
-    })
      
       app.get('/brand', async(req, res) => {
           const cursor = productsCollection.find();
@@ -83,23 +40,16 @@ async function run() {
           res.send(result);
       })
     
-    app.get('/product/:id' , async(req, res) => {
+    app.get('/product/:id'  , async(req, res) => {
           const id = req.params.id;
           const query = {_id : new ObjectId(id)};
           const result = await productsCollection.findOne(query);
           res.send(result);
-          // console.log(result);
     })
     
-    // app.get('/carts', async (req, res) => {
-    //   const cursor1 = addCollection.find();
-    //   const result = await cursor1.toArray();
-    //   console.log(result);
-    //   res.send(result);
-    // })
-    app.get('/carts',verifyToken, async (req, res) => {
-      // console.log("tokkken", req.cookies.UserToken);
-      console.log(req.user);
+
+    app.get('/carts', async (req, res) => {
+
       let query = {};
 
       if (req.query?.email) {
@@ -107,13 +57,11 @@ async function run() {
       }
       const cursor1 = addCollection.find(query);
       const result = await cursor1.toArray();
-      // console.log(result);
       res.send(result);
     })
 
       app.post('/product', async (req, res) => {
           const newProduct = req.body;
-          // console.log(newProduct);
           const result = await productsCollection.insertOne(newProduct);
           res.send(result);
       })
@@ -122,7 +70,6 @@ async function run() {
       const addProduct = req.body;
         const result = await addCollection.insertOne(addProduct);
       res.send(result);
-      // console.log(result);
 
     })
 
@@ -152,21 +99,12 @@ async function run() {
      
     })
 
-    // app.delete('/carts/:id', async(req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await addCollection.deleteOne(query);
-    //   console.log(id);
-    //   console.log(result);
-    //     res.send(result);
-    // })
+
      app.delete('/carts/:id', async(req, res) => {
-      const id = req.params.id;
+       const id = req.params.id;
        const query = { _id: id };
-      const result = await addCollection.deleteOne(query);
-      // console.log(id);
-      console.log(result);
-        res.send(result);
+       const result = await addCollection.deleteOne(query);
+       res.send(result);
     })
 
 
